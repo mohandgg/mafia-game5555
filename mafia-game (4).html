@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>مافيا ٥٢٥</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080810;--s1:#0f0f1a;--s2:#16162a;--s3:#1e1e35;--brd:#2a2a45;--red:#e63946;--teal:#2ec4b6;--gold:#ffd166;--blue:#4895ef;--green:#06d6a0;--txt:#f0f0ff;--mut:#7070a0;--mut2:#4a4a70;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+.page{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.35s,transform 0.35s;transform:translateY(16px);overflow-y:auto;}
+.page.active{opacity:1;pointer-events:all;transform:translateY(0);}
+.bg-glow{position:fixed;inset:0;z-index:-1;overflow:hidden;}
+.bg-glow::before{content:'';position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(230,57,70,.13) 0%,transparent 70%);top:-120px;right:-120px;animation:fl1 9s ease-in-out infinite;}
+.bg-glow::after{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(46,196,182,.09) 0%,transparent 70%);bottom:-80px;left:-80px;animation:fl2 11s ease-in-out infinite;}
+@keyframes fl1{0%,100%{transform:translate(0,0)}50%{transform:translate(-25px,25px)}}
+@keyframes fl2{0%,100%{transform:translate(0,0)}50%{transform:translate(25px,-20px)}}
+.logo{font-size:2.8rem;font-weight:900;text-align:center;background:linear-gradient(135deg,#e63946,#ffd166,#e63946);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shine 3s linear infinite;margin-bottom:4px;}
+@keyframes shine{to{background-position:200% center}}
+.logo-sub{color:var(--mut);font-size:.88rem;text-align:center;margin-bottom:36px;letter-spacing:2px;}
+.card{background:rgba(255,255,255,.04);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:26px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.card-title{font-size:.8rem;font-weight:700;color:var(--mut);text-align:center;margin-bottom:18px;letter-spacing:1px;text-transform:uppercase;}
+.btn{width:100%;padding:15px 20px;border-radius:14px;border:none;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:700;transition:all .22s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-red{background:linear-gradient(135deg,#e63946,#c1121f);color:#fff;box-shadow:0 8px 28px rgba(230,57,70,.35);}
+.btn-red:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(230,57,70,.5);}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--txt);border:1px solid rgba(255,255,255,.1);}
+.btn-ghost:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.2);}
+.btn-teal{background:linear-gradient(135deg,#2ec4b6,#1a8a80);color:#fff;box-shadow:0 8px 28px rgba(46,196,182,.3);}
+.btn-teal:hover{transform:translateY(-2px);}
+.btn-gold{background:linear-gradient(135deg,#ffd166,#f4a261);color:#1a1a2e;box-shadow:0 8px 28px rgba(255,209,102,.3);}
+.btn-gold:hover{transform:translateY(-2px);}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+.btn-sm{width:auto;padding:10px 18px;font-size:.88rem;border-radius:11px;}
+.stack{display:flex;flex-direction:column;gap:11px;}
+.iw{margin-bottom:15px;}
+.ilbl{font-size:.8rem;color:var(--mut);margin-bottom:5px;display:block;}
+.inp{width:100%;padding:13px 17px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:13px;color:var(--txt);font-family:'Tajawal',sans-serif;font-size:.98rem;outline:none;transition:all .2s;}
+.inp:focus{border-color:var(--red);background:rgba(230,57,70,.06);}
+.inp::placeholder{color:var(--mut2);}
+.code-box{background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.2);border-radius:18px;padding:18px;text-align:center;margin-bottom:18px;}
+.code-lbl{font-size:.78rem;color:var(--mut);margin-bottom:6px;letter-spacing:1px;}
+.code-val{font-size:2.6rem;font-weight:900;letter-spacing:10px;background:linear-gradient(135deg,var(--red),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.prow{display:flex;align-items:center;gap:11px;padding:11px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:13px;margin-bottom:7px;animation:sIn .3s ease;}
+@keyframes sIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+.pav{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;flex-shrink:0;}
+.pname{font-weight:600;flex:1;}
+.bhost{font-size:.68rem;padding:2px 7px;border-radius:20px;background:rgba(255,209,102,.15);color:var(--gold);font-weight:700;}
+.srow{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.srow:last-child{border:none;}
+.slbl{font-size:.92rem;font-weight:600;}
+.ssub{font-size:.76rem;color:var(--mut);margin-top:2px;}
+.ctr{display:flex;align-items:center;gap:9px;}
+.cbtn{width:32px;height:32px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:var(--txt);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'Tajawal',sans-serif;}
+.cbtn:hover{border-color:var(--red);color:var(--red);}
+.cval{font-weight:800;font-size:1.05rem;min-width:28px;text-align:center;}
+.rfw{width:200px;height:290px;perspective:1000px;cursor:pointer;margin:16px auto;}
+.rfl{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,0,.2,1);}
+.rfl.flipped{transform:rotateY(180deg);}
+.rfront,.rback{position:absolute;inset:0;border-radius:22px;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;}
+.rfront{background:linear-gradient(135deg,var(--s2),var(--s3));border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 50px rgba(0,0,0,.5);}
+.rback{transform:rotateY(180deg);}
+.rback.mafia{background:linear-gradient(135deg,#3d0000,#8b0000);border:1px solid rgba(230,57,70,.4);}
+.rback.doctor{background:linear-gradient(135deg,#003d3a,#006b63);border:1px solid rgba(46,196,182,.4);}
+.rback.detective{background:linear-gradient(135deg,#3d3000,#806400);border:1px solid rgba(255,209,102,.4);}
+.rback.citizen{background:linear-gradient(135deg,#001a3d,#003080);border:1px solid rgba(72,149,239,.4);}
+.remoji{font-size:4rem;margin-bottom:10px;}
+.rtitle{font-size:1.7rem;font-weight:900;}
+.rdesc{font-size:.82rem;color:rgba(255,255,255,.7);text-align:center;margin-top:7px;line-height:1.5;}
+.thint{color:var(--mut);font-size:.82rem;margin-top:10px;}
+.twrap{position:relative;width:108px;height:108px;margin:0 auto 22px;display:flex;align-items:center;justify-content:center;}
+.twrap svg{position:absolute;inset:0;transform:rotate(-90deg);}
+.tbg{fill:none;stroke:var(--s3);stroke-width:6;}
+.tfg{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 1s linear;}
+.tnum{font-size:1.8rem;font-weight:900;position:relative;z-index:1;}
+.phead{text-align:center;margin-bottom:26px;width:100%;max-width:580px;}
+.pemoji{font-size:2.6rem;margin-bottom:7px;}
+.ptitle{font-size:1.7rem;font-weight:900;}
+.psub{color:var(--mut);font-size:.88rem;margin-top:5px;}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:9px;width:100%;max-width:540px;margin-bottom:18px;}
+.tgt{padding:13px 9px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:14px;cursor:pointer;text-align:center;font-family:'Tajawal',sans-serif;font-size:.92rem;font-weight:600;color:var(--txt);transition:all .2s;}
+.tgt:hover:not(:disabled){border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.08);}
+.tgt.sr{border-color:var(--red);background:rgba(230,57,70,.15);color:var(--red);}
+.tgt.st{border-color:var(--teal);background:rgba(46,196,182,.15);color:var(--teal);}
+.tgt.sg{border-color:var(--gold);background:rgba(255,209,102,.15);color:var(--gold);}
+.tgt:disabled{opacity:.3;cursor:not-allowed;}
+.tgt .sub{font-size:.68rem;color:var(--mut);display:block;margin-top:2px;}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:9px;width:100%;max-width:620px;margin-bottom:18px;}
+.vcard{padding:15px 11px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:14px;cursor:pointer;text-align:center;font-family:'Tajawal',sans-serif;color:var(--txt);transition:all .2s;position:relative;overflow:hidden;}
+.vcard:hover:not(:disabled){border-color:rgba(255,209,102,.4);}
+.vcard.voted{border-color:var(--gold);background:rgba(255,209,102,.12);}
+.vcard:disabled{opacity:.3;cursor:not-allowed;}
+.vname{font-size:.98rem;font-weight:700;}
+.vcnt{font-size:.76rem;color:var(--mut);margin-top:3px;}
+.vbar{position:absolute;bottom:0;left:0;height:3px;background:var(--gold);transition:width .4s;}
+.jbox{background:rgba(255,209,102,.06);border:1px solid rgba(255,209,102,.2);border-radius:18px;padding:22px;text-align:center;width:100%;max-width:540px;margin-bottom:18px;}
+.jname{font-size:1.5rem;font-weight:900;color:var(--gold);margin-bottom:7px;}
+.eov{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;animation:fIn .4s;text-align:center;padding:20px;}
+@keyframes fIn{from{opacity:0}to{opacity:1}}
+.eicon{font-size:5.5rem;animation:pop .5s cubic-bezier(.34,1.56,.64,1);}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.etitle{font-size:2rem;font-weight:900;margin-top:14px;}
+.esub{font-size:1rem;color:var(--mut);margin-top:7px;max-width:320px;}
+.rcard{width:100%;max-width:460px;border-radius:18px;padding:26px;text-align:center;margin-bottom:18px;}
+.rcard.death{background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.25);}
+.rcard.saved{background:rgba(46,196,182,.08);border:1px solid rgba(46,196,182,.25);}
+.rcard.quiet{background:rgba(72,149,239,.08);border:1px solid rgba(72,149,239,.2);}
+.spc-row{display:flex;align-items:center;gap:11px;padding:11px 14px;background:rgba(255,255,255,.04);border-radius:13px;margin-bottom:7px;border:1px solid rgba(255,255,255,.06);}
+.spc-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.win-ic{font-size:6.5rem;animation:wp 2s ease-in-out infinite;}
+@keyframes wp{0%,100%{transform:scale(1) rotate(0deg)}25%{transform:scale(1.1) rotate(-3deg)}75%{transform:scale(1.1) rotate(3deg)}}
+#notifs{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:500;display:flex;flex-direction:column;gap:7px;width:90%;max-width:360px;}
+.notif{background:rgba(25,25,45,.95);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:11px 16px;font-size:.88rem;display:flex;align-items:center;gap:9px;animation:nIn .3s ease;box-shadow:0 8px 28px rgba(0,0,0,.4);}
+@keyframes nIn{from{opacity:0;transform:translateY(-9px)}to{opacity:1;transform:translateY(0)}}
+#flash{position:fixed;inset:0;pointer-events:none;z-index:1000;opacity:0;}
+.dvdr{display:flex;align-items:center;gap:11px;margin:18px 0;color:var(--mut);font-size:.8rem;}
+.dvdr::before,.dvdr::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08);}
+.wfull{width:100%;max-width:540px;}
+.sleep-ic{font-size:5rem;animation:slp 2.5s ease-in-out infinite;}
+@keyframes slp{0%,100%{transform:scale(1) translateY(0)}50%{transform:scale(1.06) translateY(-8px)}}
+.mt{margin-top:14px;}
+.scroll{overflow-y:auto;max-height:270px;}
+@media(max-width:400px){.logo{font-size:2.1rem;}.card{padding:16px;}.tgrid{grid-template-columns:repeat(auto-fill,minmax(88px,1fr));}}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div id="notifs"></div>
+<div id="flash"></div>
+
+<!-- HOME -->
+<div id="pg-home" class="page active">
+  <div class="logo">🎭 مافيا ٥٢٥</div>
+  <div class="logo-sub">لعبة الخداع والذكاء</div>
+  <div class="card">
+    <div class="stack">
+      <button class="btn btn-red" onclick="go('pg-create')">➕ إنشاء مجموعة</button>
+      <button class="btn btn-ghost" onclick="go('pg-join')">🔑 ادخل بكود</button>
+      <div class="dvdr">الصوت</div>
+      <button class="btn btn-ghost" id="snd-btn" onclick="enableSound()">🔇 فعّل الصوت (مهم!)</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE -->
+<div id="pg-create" class="page">
+  <div class="logo" style="font-size:1.7rem;margin-bottom:8px">إنشاء مجموعة</div>
+  <div class="card">
+    <div class="iw"><label class="ilbl">اسمك في اللعبة</label><input class="inp" id="cn" placeholder="اكتب اسمك..." maxlength="20"></div>
+    <div class="stack">
+      <button class="btn btn-red" onclick="createRoom()">🚀 إنشاء</button>
+      <button class="btn btn-ghost" onclick="go('pg-home')">← رجوع</button>
+    </div>
+  </div>
+</div>
+
+<!-- JOIN -->
+<div id="pg-join" class="page">
+  <div class="logo" style="font-size:1.7rem;margin-bottom:8px">ادخل مجموعة</div>
+  <div class="card">
+    <div class="iw"><label class="ilbl">كود الغرفة</label><input class="inp" id="jc" placeholder="ABC123" maxlength="6" style="letter-spacing:5px;text-align:center;text-transform:uppercase"></div>
+    <div class="iw"><label class="ilbl">اسمك في اللعبة</label><input class="inp" id="jn" placeholder="اكتب اسمك..." maxlength="20"></div>
+    <div class="stack">
+      <button class="btn btn-red" onclick="joinRoom()">🎮 ادخل</button>
+      <button class="btn btn-ghost" onclick="go('pg-home')">← رجوع</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOBBY -->
+<div id="pg-lobby" class="page" style="justify-content:flex-start;padding-top:36px">
+  <div class="code-box" style="width:100%;max-width:440px"><div class="code-lbl">كود الغرفة</div><div class="code-val" id="lcode">------</div></div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">اللاعبون <span id="lcnt" style="color:var(--red)">0</span></div>
+    <div class="scroll" id="lplayers"></div>
+  </div>
+  <div style="width:100%;max-width:440px" id="hctrl">
+    <button class="btn btn-ghost" style="margin-bottom:9px" onclick="go('pg-settings')">⚙️ الإعدادات</button>
+    <button class="btn btn-red" id="sbtn" onclick="startGame()" disabled>🎲 ابدأ اللعبة</button>
+    <p style="text-align:center;color:var(--mut);font-size:.82rem;margin-top:9px" id="shint">يحتاج 4 لاعبين على الأقل</p>
+  </div>
+  <div style="width:100%;max-width:440px;text-align:center;color:var(--mut)" id="gwait">⏳ بانتظار المضيف...</div>
+</div>
+
+<!-- SETTINGS -->
+<div id="pg-settings" class="page" style="justify-content:flex-start;padding-top:28px">
+  <div class="logo" style="font-size:1.5rem;margin-bottom:18px">⚙️ الإعدادات</div>
+  <div class="card" style="max-width:470px">
+    <div class="srow"><div><div class="slbl">😈 عدد المافيا</div></div><div class="ctr"><button class="cbtn" onclick="cs('mafia',-1)">−</button><span class="cval" id="s-mafia">2</span><button class="cbtn" onclick="cs('mafia',1)">+</button></div></div>
+    <div class="srow"><div><div class="slbl">🩺 دكتور</div></div><div class="ctr"><button class="cbtn" onclick="cs('doctor',-1)">−</button><span class="cval" id="s-doctor">1</span><button class="cbtn" onclick="cs('doctor',1)">+</button></div></div>
+    <div class="srow"><div><div class="slbl">🔍 شايب</div></div><div class="ctr"><button class="cbtn" onclick="cs('detective',-1)">−</button><span class="cval" id="s-detective">1</span><button class="cbtn" onclick="cs('detective',1)">+</button></div></div>
+    <div class="srow"><div><div class="slbl">🌙 وقت المافيا (ث)</div></div><div class="ctr"><button class="cbtn" onclick="cs('mafiaTime',-5)">−</button><span class="cval" id="s-mafiaTime">30</span><button class="cbtn" onclick="cs('mafiaTime',5)">+</button></div></div>
+    <div class="srow"><div><div class="slbl">🩺 وقت الدكتور (ث)</div></div><div class="ctr"><button class="cbtn" onclick="cs('doctorTime',-5)">−</button><span class="cval" id="s-doctorTime">20</span><button class="cbtn" onclick="cs('doctorTime',5)">+</button></div></div>
+    <div class="srow"><div><div class="slbl">🔍 وقت الشايب (ث)</div></div><div class="ctr"><button class="cbtn" onclick="cs('detectiveTime',-5)">−</button><span class="cval" id="s-detectiveTime">20</span><button class="cbtn" onclick="cs('detectiveTime',5)">+</button></div></div>
+    <div class="srow"><div><div class="slbl">☀️ وقت النهار (ث)</div><div class="ssub">0 = بلا حد</div></div><div class="ctr"><button class="cbtn" onclick="cs('dayTime',-10)">−</button><span class="cval" id="s-dayTime">0</span><button class="cbtn" onclick="cs('dayTime',10)">+</button></div></div>
+    <div class="srow"><div><div class="slbl">🗣️ وقت التبرير (ث)</div></div><div class="ctr"><button class="cbtn" onclick="cs('justifyTime',-5)">−</button><span class="cval" id="s-justifyTime">30</span><button class="cbtn" onclick="cs('justifyTime',5)">+</button></div></div>
+    <div class="mt"><button class="btn btn-red" onclick="saveSettings()">✓ حفظ</button></div>
+  </div>
+</div>
+
+<!-- ROLE -->
+<div id="pg-role" class="page">
+  <div class="phead"><div class="pemoji">🃏</div><div class="ptitle">دورك في اللعبة</div><div class="psub">اضغط على البطاقة — لا تريها لأحد!</div></div>
+  <div class="rfw"><div class="rfl" id="rfl" onclick="flipRole()"><div class="rfront"><div style="font-size:2.8rem">❓</div><div class="thint" style="margin-top:18px">اضغط لتكشف دورك</div></div><div class="rback" id="rback"><div class="remoji" id="remi">🎭</div><div class="rtitle" id="rtitle">---</div><div class="rdesc" id="rdesc">---</div></div></div></div>
+  <div style="width:100%;max-width:260px"><button class="btn btn-red mt" id="rbtn" onclick="playerReady()">✅ جاهز</button></div>
+</div>
+
+<!-- SLEEP -->
+<div id="pg-sleep" class="page"><div class="sleep-ic">🌙</div><div style="font-size:1.2rem;color:var(--mut);margin-top:14px;font-weight:600">الجميع نائم...</div></div>
+
+<!-- MAFIA -->
+<div id="pg-mafia" class="page">
+  <div class="phead"><div class="pemoji">😈</div><div class="ptitle" style="color:var(--red)">دور المافيا</div><div class="psub">اختر الضحية</div></div>
+  <div class="twrap"><svg width="108" height="108" viewBox="0 0 108 108"><circle class="tbg" cx="54" cy="54" r="47"/><circle class="tfg" id="t-mafia" cx="54" cy="54" r="47" stroke="var(--red)" stroke-dasharray="295.31" stroke-dashoffset="0"/></svg><div class="tnum" id="n-mafia">30</div></div>
+  <div class="tgrid" id="mafia-tgts"></div>
+  <div class="wfull"><button class="btn btn-red" id="mok" onclick="mafiaConfirm()" disabled>تأكيد الاختيار 🔫</button></div>
+</div>
+
+<!-- DOCTOR -->
+<div id="pg-doctor" class="page">
+  <div class="phead"><div class="pemoji">🩺</div><div class="ptitle" style="color:var(--teal)">دور الدكتور</div><div class="psub">من تحمي الليلة؟</div></div>
+  <div class="twrap"><svg width="108" height="108" viewBox="0 0 108 108"><circle class="tbg" cx="54" cy="54" r="47"/><circle class="tfg" id="t-doctor" cx="54" cy="54" r="47" stroke="var(--teal)" stroke-dasharray="295.31" stroke-dashoffset="0"/></svg><div class="tnum" id="n-doctor">20</div></div>
+  <div class="tgrid" id="doctor-tgts"></div>
+  <div class="wfull"><button class="btn btn-teal" id="dok" onclick="doctorConfirm()" disabled>تأكيد الحماية 🛡️</button></div>
+</div>
+
+<!-- DETECTIVE -->
+<div id="pg-detective" class="page">
+  <div class="phead"><div class="pemoji">🔍</div><div class="ptitle" style="color:var(--gold)">دور الشايب</div><div class="psub">اسأل عن شخص</div></div>
+  <div class="twrap"><svg width="108" height="108" viewBox="0 0 108 108"><circle class="tbg" cx="54" cy="54" r="47"/><circle class="tfg" id="t-detective" cx="54" cy="54" r="47" stroke="var(--gold)" stroke-dasharray="295.31" stroke-dashoffset="0"/></svg><div class="tnum" id="n-detective">20</div></div>
+  <div class="tgrid" id="det-tgts"></div>
+  <div class="wfull"><button class="btn btn-gold" id="detok" onclick="detectiveConfirm()" disabled>تأكيد السؤال 📖</button></div>
+</div>
+
+<!-- DET RESULT -->
+<div id="pg-det-result" class="page">
+  <div class="phead"><div class="pemoji">🔍</div><div class="ptitle" style="color:var(--gold)">نتيجة الشايب</div><div class="psub">هذي المعلومة لك وحدك</div></div>
+  <div class="card" style="max-width:370px;text-align:center"><div style="color:var(--mut);font-size:.88rem;margin-bottom:7px">اللاعب الذي سألت عنه</div><div style="font-size:1.7rem;font-weight:900;margin-bottom:14px" id="dname">---</div><div id="dverd" style="font-size:1.1rem;font-weight:700;padding:11px 22px;border-radius:13px;display:inline-block">---</div></div>
+  <div style="width:100%;max-width:370px;margin-top:18px"><button class="btn btn-gold" onclick="detectiveDone()">حفظت ✓</button></div>
+</div>
+
+<!-- NIGHT RESULTS -->
+<div id="pg-night-results" class="page">
+  <div class="phead"><div class="pemoji">🌅</div><div class="ptitle">الصباح أشرق</div><div class="psub" id="nround">الجولة 1</div></div>
+  <div id="ncard"></div>
+  <div style="width:100%;max-width:460px"><button class="btn btn-red" onclick="nightContinue()">التصويت ☀️</button></div>
+</div>
+
+<!-- DAY -->
+<div id="pg-day" class="page" style="background:linear-gradient(180deg,#12100a 0%,#080810 100%)">
+  <div class="phead"><div class="pemoji">☀️</div><div class="ptitle">وقت التصويت</div><div class="psub">من تشتبه أنه مافيا؟</div></div>
+  <div class="twrap"><svg width="108" height="108" viewBox="0 0 108 108"><circle class="tbg" cx="54" cy="54" r="47"/><circle class="tfg" id="t-day" cx="54" cy="54" r="47" stroke="var(--gold)" stroke-dasharray="295.31" stroke-dashoffset="0"/></svg><div class="tnum" id="n-day">∞</div></div>
+  <div class="vgrid" id="vgrid"></div>
+  <div style="width:100%;max-width:620px;display:flex;gap:11px">
+    <button class="btn btn-ghost" style="flex:1" onclick="voteSkip()">⏭️ تخطي</button>
+    <button class="btn btn-red" style="flex:2" id="vok" onclick="voteConfirm()" disabled>تأكيد التصويت</button>
+  </div>
+</div>
+
+<!-- JUSTIFY -->
+<div id="pg-justify" class="page" style="background:linear-gradient(180deg,#12100a 0%,#080810 100%)">
+  <div class="phead"><div class="pemoji">🗣️</div><div class="ptitle">وقت التبرير</div></div>
+  <div class="jbox"><div class="jname" id="jname">---</div><div style="color:var(--mut);font-size:.86rem">برر نفسك أمام اللاعبين</div><div class="twrap" style="margin-top:14px"><svg width="108" height="108" viewBox="0 0 108 108"><circle class="tbg" cx="54" cy="54" r="47"/><circle class="tfg" id="t-justify" cx="54" cy="54" r="47" stroke="var(--gold)" stroke-dasharray="295.31" stroke-dashoffset="0"/></svg><div class="tnum" id="n-justify">30</div></div></div>
+  <div style="width:100%;max-width:540px"><div style="text-align:center;color:var(--mut);font-size:.85rem;margin-bottom:11px">هل تصوتون على إخراجه؟</div><div style="display:flex;gap:11px"><button class="btn btn-ghost" style="flex:1" onclick="justifyVote(false)">✋ لا</button><button class="btn btn-red" style="flex:1" onclick="justifyVote(true)">👇 أطرده</button></div></div>
+</div>
+
+<!-- SPECTATOR -->
+<div id="pg-spectator" class="page" style="justify-content:flex-start;padding-top:36px">
+  <div class="phead"><div class="pemoji">👻</div><div class="ptitle" style="color:var(--mut)">أنت خارج اللعبة</div><div class="psub">تابع كمراقب</div></div>
+  <div class="card" style="max-width:470px"><div class="card-title">اللاعبون وأدوارهم</div><div id="spec-list"></div></div>
+</div>
+
+<!-- WIN -->
+<div id="pg-win" class="page">
+  <div class="win-ic" id="wic">🏆</div>
+  <div style="font-size:2.3rem;font-weight:900;text-align:center;margin:14px 0 7px" id="wtitle">فاز المواطنون!</div>
+  <div style="color:var(--mut);text-align:center;font-size:1rem" id="wsub">تم القضاء على المافيا</div>
+  <div class="card" style="max-width:370px;margin-top:28px"><button class="btn btn-red" onclick="resetGame()">🔄 لعبة جديدة</button></div>
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getDatabase,ref,set,get,update,onValue,off}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+const FC={apiKey:"AIzaSyBzI7mHc7uOtKu3EifUMvZY959UQEe1xg4",authDomain:"mafia-525.firebaseapp.com",projectId:"mafia-525",storageBucket:"mafia-525.firebasestorage.app",messagingSenderId:"1065985946565",appId:"1:1065985946565:web:a5648ac41eefdd5d79d1ac",databaseURL:"https://mafia-525-default-rtdb.firebaseio.com"};
+const app=initializeApp(FC),db=getDatabase(app);
+let S={name:'',role:'',isHost:false,code:'',players:[],settings:{mafia:2,doctor:1,detective:1,mafiaTime:30,doctorTime:20,detectiveTime:20,dayTime:0,justifyTime:30},round:1,justifyTarget:null,mafiaChoice:null,doctorChoice:null,detectiveChoice:null};
+let myVote=null,myJV=null,aRef=null,timerInt=null;
+function rRef(c){return ref(db,'rooms/'+(c||S.code));}
+async function load(){const s=await get(rRef());return s.exists()?s.val():null;}
+function listen(cb){if(aRef)off(aRef);aRef=rRef();onValue(aRef,s=>{if(s.exists())cb(s.val());});}
+function stopL(){if(aRef){off(aRef);aRef=null;}}
+function go(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function notif(t,ic='ℹ️',d=3000){const a=document.getElementById('notifs'),el=document.createElement('div');el.className='notif';el.innerHTML=`<span>${ic}</span><span>${t}</span>`;a.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transform='translateY(-8px)';el.style.transition='all .3s';setTimeout(()=>el.remove(),300);},d);}
+let actx=null;
+function getC(){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();return actx;}
+function enableSound(){try{const c=getC(),o=c.createOscillator(),g=c.createGain();g.gain.value=.001;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.1);document.getElementById('snd-btn').textContent='🔊 الصوت مفعّل ✓';document.getElementById('snd-btn').style.color='var(--green)';document.getElementById('snd-btn').style.borderColor='var(--green)';notif('الصوت مفعّل ✓','🔊');}catch(e){}}
+const VOICES={'mafia-open':'https://media1.vocaroo.com/mp3/18MsVEVfz1Fx','mafia-close':'https://media1.vocaroo.com/mp3/19IZ3r6xtWNT','doctor-open':'https://media1.vocaroo.com/mp3/1hN6e8OGqM9y','doctor-close':'https://media1.vocaroo.com/mp3/1diyBEl3ocZl','detective-open':'https://media1.vocaroo.com/mp3/16ChGmjaLCZF','detective-close':'https://media1.vocaroo.com/mp3/1a7smiWJ9eXR'};
+function speak(key,delay=0){setTimeout(()=>{try{const url=VOICES[key];if(url){const a=new Audio(url);a.volume=1;a.play().catch(()=>{});}}catch(e){}},delay);}
+function playGun(){try{const c=getC(),buf=c.createBuffer(1,c.sampleRate*.5,c.sampleRate),d=buf.getChannelData(0);for(let i=0;i<buf.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/buf.length,2.2);const s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();s.buffer=buf;f.type='lowpass';f.frequency.value=900;g.gain.setValueAtTime(2,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.5);s.connect(f);f.connect(g);g.connect(c.destination);s.start();}catch(e){}}
+function playMeds(){try{const c=getC(),buf=c.createBuffer(1,c.sampleRate*.4,c.sampleRate),d=buf.getChannelData(0);for(let i=0;i<buf.length;i++){const sh=Math.sin(i*.3)*Math.random();d[i]=sh*(Math.random()>.7?.3:.05)*Math.pow(1-i/buf.length,1.5);}const s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();s.buffer=buf;f.type='highpass';f.frequency.value=2000;g.gain.value=.6;s.connect(f);f.connect(g);g.connect(c.destination);s.start();setTimeout(()=>{[523,659,784].forEach((fr,i)=>{const o=c.createOscillator(),gn=c.createGain();o.connect(gn);gn.connect(c.destination);o.frequency.value=fr;o.type='sine';const t=c.currentTime+i*.12;gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(.2,t+.05);gn.gain.exponentialRampToValueAtTime(.001,t+.2);o.start(t);o.stop(t+.2);});},200);}catch(e){}}
+function playPen(){try{const c=getC();[0,.12,.24,.36,.48].forEach(dl=>{const buf=c.createBuffer(1,Math.floor(c.sampleRate*.06),c.sampleRate),d=buf.getChannelData(0);for(let i=0;i<buf.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/buf.length,5)*.5;const s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();s.buffer=buf;f.type='bandpass';f.frequency.value=3500;f.Q.value=.5;g.gain.value=.4;s.connect(f);f.connect(g);g.connect(c.destination);s.start(c.currentTime+dl);});}catch(e){}}
+function playDing(){try{const c=getC(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;o.type='sine';g.gain.setValueAtTime(.3,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+1);o.start();o.stop(c.currentTime+1);}catch(e){}}
+function flash(){const f=document.getElementById('flash');f.style.background='white';f.style.opacity='.25';setTimeout(()=>{f.style.transition='opacity .3s';f.style.opacity='0';setTimeout(()=>{f.style.transition='';},300);},50);}
+function genCode(){return Math.random().toString(36).substring(2,8).toUpperCase();}
+function isAlive(n){const p=S.players.find(x=>x.name===n);return p?p.alive:false;}
+function roleAr(r){return{mafia:'😈 مافيا',doctor:'🩺 دكتور',detective:'🔍 شايب',citizen:'👤 مواطن'}[r]||r;}
+function showEvent(icon,title,sub,cb){const el=document.createElement('div');el.className='eov';el.innerHTML=`<div class="eicon">${icon}</div><div class="etitle">${title}</div><div class="esub">${sub}</div><div style="margin-top:26px"><button class="btn btn-red btn-sm" onclick="this.closest('.eov').remove();if(window._evcb){window._evcb();window._evcb=null;}">حسناً</button></div>`;document.body.appendChild(el);window._evcb=cb;}
+async function createRoom(){const name=document.getElementById('cn').value.trim();if(!name){notif('اكتب اسمك أولاً','⚠️');return;}S.name=name;S.isHost=true;S.code=genCode();S.players=[{name,alive:true,role:''}];await set(rRef(S.code),{phase:'lobby',players:S.players,settings:S.settings,round:1,readyPlayers:[],mafiaKillVote:{},dayVotes:{}});document.getElementById('lcode').textContent=S.code;document.getElementById('hctrl').style.display='block';document.getElementById('gwait').style.display='none';go('pg-lobby');listenLobby();}
+async function joinRoom(){const code=document.getElementById('jc').value.trim().toUpperCase(),name=document.getElementById('jn').value.trim();if(!code||!name){notif('اكتب الكود والاسم','⚠️');return;}const snap=await get(ref(db,'rooms/'+code));if(!snap.exists()){notif('كود غلط!','❌');return;}const room=snap.val();if(room.phase!=='lobby'){notif('اللعبة بدأت','❌');return;}const players=room.players||[];if(players.some(p=>p.name.toLowerCase()===name.toLowerCase())){notif('الاسم محجوز','❌');return;}S.name=name;S.isHost=false;S.code=code;players.push({name,alive:true,role:''});await update(ref(db,'rooms/'+code),{players});document.getElementById('lcode').textContent=code;document.getElementById('hctrl').style.display='none';document.getElementById('gwait').style.display='block';go('pg-lobby');listenLobby();}
+function listenLobby(){listen(r=>{renderLobby(r);if(r.phase==='role'){stopL();syncRoom(r);startRoleReveal();}});}
+function renderLobby(room){const players=room.players||[];document.getElementById('lcnt').textContent=players.length;const el=document.getElementById('lplayers');el.innerHTML='';players.forEach((p,i)=>{const d=document.createElement('div');d.className='prow';d.innerHTML=`<div class="pav">${p.name[0]}</div><div class="pname">${p.name}</div>${i===0?'<span class="bhost">مضيف</span>':''}`;el.appendChild(d);});if(S.isHost){document.getElementById('sbtn').disabled=players.length<4;document.getElementById('shint').textContent=players.length<4?`يحتاج ${4-players.length} أكثر`:`${players.length} جاهزون ✓`;}}
+function syncRoom(r){const me=(r.players||[]).find(p=>p.name===S.name);if(me)S.role=me.role;S.players=r.players||[];S.settings=r.settings||S.settings;S.round=r.round||1;}
+function cs(k,d){const mn={mafia:1,doctor:0,detective:0,mafiaTime:10,doctorTime:10,detectiveTime:10,dayTime:0,justifyTime:10},mx={mafia:6,doctor:3,detective:2,mafiaTime:120,doctorTime:60,detectiveTime:60,dayTime:300,justifyTime:120};S.settings[k]=Math.max(mn[k],Math.min(mx[k],S.settings[k]+d));document.getElementById('s-'+k).textContent=S.settings[k];}
+function saveSettings(){notif('تم الحفظ ✓','✅');go('pg-lobby');}
+async function startGame(){const room=await load();if(!room)return;const players=room.players,n=players.length,s=S.settings;if(s.mafia+s.doctor+s.detective>=n){notif('الأدوار أكثر من اللاعبين!','⚠️');return;}let roles=[];for(let i=0;i<s.mafia;i++)roles.push('mafia');for(let i=0;i<s.doctor;i++)roles.push('doctor');for(let i=0;i<s.detective;i++)roles.push('detective');while(roles.length<n)roles.push('citizen');for(let i=roles.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[roles[i],roles[j]]=[roles[j],roles[i]];}players.forEach((p,i)=>p.role=roles[i]);await set(rRef(),{phase:'role',players,settings:s,round:1,readyPlayers:[],mafiaKillVote:{},dayVotes:{},justifyVotes:{yes:0,no:0},justifyVoted:[]});syncRoom({players,settings:s,round:1});startRoleReveal();}
+function startRoleReveal(){stopL();const inf={mafia:{e:'😈',t:'مافيا',d:'تقتل لاعباً كل ليلة مع فريقك',c:'mafia'},doctor:{e:'🩺',t:'دكتور',d:'تحمي لاعباً واحداً كل ليلة',c:'doctor'},detective:{e:'🔍',t:'شايب',d:'تكشف هوية لاعب كل ليلة',c:'detective'},citizen:{e:'👤',t:'مواطن',d:'ساعد باكتشاف المافيا بالتصويت',c:'citizen'}};const r=inf[S.role]||inf.citizen;document.getElementById('remi').textContent=r.e;document.getElementById('rtitle').textContent=r.t;document.getElementById('rdesc').textContent=r.d;document.getElementById('rback').className='rback '+r.c;document.getElementById('rfl').classList.remove('flipped');document.getElementById('rbtn').textContent='✅ جاهز';document.getElementById('rbtn').disabled=false;go('pg-role');}
+function flipRole(){document.getElementById('rfl').classList.add('flipped');}
+async function playerReady(){document.getElementById('rbtn').textContent='⏳ بانتظار الجميع...';document.getElementById('rbtn').disabled=true;const room=await load();const ready=room.readyPlayers||[];if(!ready.includes(S.name))ready.push(S.name);await update(rRef(),{readyPlayers:ready});listen(r=>{if((r.readyPlayers||[]).length>=(r.players||[]).length){stopL();startNight();}});}
+async function startNight(){playDing();flash();const room=await load();S.players=room.players||[];S.settings=room.settings||S.settings;go('pg-sleep');setTimeout(()=>{if(S.role==='mafia')startMafia();else waitPhase('night-doctor',r=>{if(S.role==='doctor'&&isAlive(S.name))startDoctor();else waitPhase('night-detective',r2=>{if(S.role==='detective'&&isAlive(S.name))startDetective();else waitPhase('night-results',r3=>startNightResults(r3));});});},2500);}
+function waitPhase(phase,cb){listen(r=>{if(r.phase===phase||r.phase==='night-results'){stopL();S.players=r.players||S.players;if(r.phase===phase)cb(r);else if(phase!=='night-results')startNightResults(r);}});}
+function startMafia(){playDing();setTimeout(()=>playGun(),500);speak('mafia-open',900);S.mafiaChoice=null;const tgts=S.players.filter(p=>p.alive&&p.role!=='mafia');const el=document.getElementById('mafia-tgts');el.innerHTML='';tgts.forEach(p=>{const b=document.createElement('button');b.className='tgt';b.textContent=p.name;b.onclick=()=>{document.querySelectorAll('#mafia-tgts .tgt').forEach(x=>x.classList.remove('sr'));b.classList.add('sr');S.mafiaChoice=p.name;document.getElementById('mok').disabled=false;};el.appendChild(b);});document.getElementById('mok').disabled=true;go('pg-mafia');startTimer('mafia',S.settings.mafiaTime,()=>mafiaConfirm());}
+async function mafiaConfirm(){stopTimer();speak('mafia-close',0);if(!S.mafiaChoice){const t=S.players.filter(p=>p.alive&&p.role!=='mafia');if(t.length)S.mafiaChoice=t[Math.floor(Math.random()*t.length)].name;}const room=await load();const votes=room.mafiaKillVote||{};votes[S.name]=S.mafiaChoice;const mafias=(room.players||[]).filter(p=>p.role==='mafia'&&p.alive);const allVoted=mafias.every(p=>votes[p.name]);const upd={mafiaKillVote:votes};if(allVoted){const counts={};mafias.forEach(p=>{counts[votes[p.name]]=(counts[votes[p.name]]||0)+1;});upd.nightKill=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];upd.phase='night-doctor';}await update(rRef(),upd);go('pg-sleep');waitPhase('night-detective',r=>{if(S.role==='detective'&&isAlive(S.name))startDetective();else waitPhase('night-results',r2=>startNightResults(r2));});}
+async function startDoctor(){playDing();setTimeout(()=>playMeds(),500);speak('doctor-open',900);const room=await load();S.doctorChoice=null;const tgts=(room.players||[]).filter(p=>p.alive);const el=document.getElementById('doctor-tgts');el.innerHTML='';tgts.forEach(p=>{const b=document.createElement('button');b.className='tgt';b.textContent=p.name;if(p.name===room.lastDoctorProtect){b.disabled=true;b.innerHTML+=`<span class="sub">محمي سابقاً</span>`;}b.onclick=()=>{document.querySelectorAll('#doctor-tgts .tgt').forEach(x=>x.classList.remove('st'));b.classList.add('st');S.doctorChoice=p.name;document.getElementById('dok').disabled=false;};el.appendChild(b);});document.getElementById('dok').disabled=true;go('pg-doctor');startTimer('doctor',S.settings.doctorTime,()=>doctorConfirm());}
+async function doctorConfirm(){stopTimer();speak('doctor-close',0);if(!S.doctorChoice){const a=S.players.filter(p=>p.alive);if(a.length)S.doctorChoice=a[Math.floor(Math.random()*a.length)].name;}await update(rRef(),{nightProtect:S.doctorChoice,lastDoctorProtect:S.doctorChoice,phase:'night-detective'});go('pg-sleep');waitPhase('night-results',r=>startNightResults(r));}
+async function startDetective(){playDing();setTimeout(()=>playPen(),500);speak('detective-open',900);const room=await load();S.detectiveChoice=null;const tgts=(room.players||[]).filter(p=>p.alive&&p.name!==S.name);const el=document.getElementById('det-tgts');el.innerHTML='';tgts.forEach(p=>{const b=document.createElement('button');b.className='tgt';b.textContent=p.name;b.onclick=()=>{document.querySelectorAll('#det-tgts .tgt').forEach(x=>x.classList.remove('sg'));b.classList.add('sg');S.detectiveChoice=p.name;document.getElementById('detok').disabled=false;};el.appendChild(b);});document.getElementById('detok').disabled=true;go('pg-detective');startTimer('detective',S.settings.detectiveTime,()=>detectiveConfirm());}
+async function detectiveConfirm(){stopTimer();speak('detective-close',0);if(!S.detectiveChoice){const t=S.players.filter(p=>p.alive&&p.name!==S.name);if(t.length)S.detectiveChoice=t[Math.floor(Math.random()*t.length)].name;}const room=await load();const target=(room.players||[]).find(p=>p.name===S.detectiveChoice);const isMafia=target&&target.role==='mafia';document.getElementById('dname').textContent=S.detectiveChoice;const v=document.getElementById('dverd');v.textContent=isMafia?'😈 هذا الشخص مافيا!':'👤 هذا الشخص مواطن';v.style.background=isMafia?'rgba(230,57,70,.2)':'rgba(72,149,239,.2)';v.style.color=isMafia?'var(--red)':'var(--blue)';await update(rRef(),{phase:'night-results'});go('pg-det-result');}
+function detectiveDone(){startNightResults(null);}
+async function startNightResults(room){if(!room)room=await load();playDing();flash();const killed=room.nightKill,protect=room.nightProtect,died=killed&&killed!==protect,players=room.players||[];if(died){const i=players.findIndex(p=>p.name===killed);if(i>=0)players[i].alive=false;}await update(rRef(),{phase:'day',players,nightKill:null,nightProtect:null,mafiaKillVote:{}});S.players=players;S.round=room.round||1;const card=document.getElementById('ncard');if(died){card.innerHTML=`<div class="rcard death"><div style="font-size:3.2rem">💀</div><div style="font-size:1.4rem;font-weight:900;margin-top:9px">${killed}</div><div style="color:var(--mut);margin-top:5px">مات هذه الليلة</div></div>`;}else if(killed&&killed===protect){card.innerHTML=`<div class="rcard saved"><div style="font-size:3.2rem">🛡️</div><div style="font-size:1.4rem;font-weight:900;margin-top:9px">${protect}</div><div style="color:var(--teal);margin-top:5px;font-weight:700">✅ تم حماية ${protect} بنجاح!</div></div>`;}else if(protect&&!killed){card.innerHTML=`<div class="rcard saved"><div style="font-size:3.2rem">🛡️</div><div style="font-size:1.4rem;font-weight:900;margin-top:9px">${protect}</div><div style="color:var(--teal);margin-top:5px;font-weight:700">✅ تم حماية ${protect} بنجاح!</div></div>`;}else{card.innerHTML=`<div class="rcard quiet"><div style="font-size:3.2rem">🌙</div><div style="font-size:1.1rem;font-weight:800;margin-top:9px">ليلة هادئة</div><div style="color:var(--mut);margin-top:5px">لم يُقتل أحد</div></div>`;}document.getElementById('nround').textContent=`الجولة ${S.round}`;const win=checkWin(players);if(win){setTimeout(()=>showWin(win,players),1500);return;}const me=players.find(p=>p.name===S.name);if(me&&!me.alive){setTimeout(()=>showSpectator(players),1800);return;}go('pg-night-results');}
+function nightContinue(){startDay();}
+async function startDay(){playDing();const room=await load();S.players=room.players||[];S.settings=room.settings||S.settings;myVote=null;await update(rRef(),{dayVotes:{}});const grid=document.getElementById('vgrid');grid.innerHTML='';S.players.filter(p=>p.alive&&p.name!==S.name).forEach(p=>{const b=document.createElement('div');b.className='vcard';b.id='vc-'+p.name;b.innerHTML=`<div class="vname">${p.name}</div><div class="vcnt" id="vcnt-${p.name}">0 أصوات</div><div class="vbar" id="vbar-${p.name}" style="width:0%"></div>`;b.onclick=()=>{document.querySelectorAll('.vcard').forEach(x=>x.classList.remove('voted'));b.classList.add('voted');myVote=p.name;document.getElementById('vok').disabled=false;};grid.appendChild(b);});document.getElementById('vok').disabled=true;go('pg-day');if(S.settings.dayTime>0)startTimer('day',S.settings.dayTime,()=>voteConfirm());else{document.getElementById('n-day').textContent='∞';document.getElementById('t-day').style.strokeDashoffset='0';}listen(r=>{const votes=r.dayVotes||{},alive=(r.players||[]).filter(p=>p.alive),total=alive.length,counts={};Object.values(votes).forEach(v=>{if(v&&v!=='__skip__')counts[v]=(counts[v]||0)+1;});alive.forEach(p=>{const el=document.getElementById('vcnt-'+p.name),bar=document.getElementById('vbar-'+p.name);if(el)el.textContent=(counts[p.name]||0)+' أصوات';if(bar)bar.style.width=((counts[p.name]||0)/Math.max(total,1)*100)+'%';});if(Object.keys(votes).length>=total){stopL();stopTimer();processVotes(counts,total);}});}
+async function voteSkip(){const me=S.players.find(p=>p.name===S.name);if(!me||!me.alive)return;await submitVote('__skip__');}
+async function voteConfirm(){stopTimer();const me=S.players.find(p=>p.name===S.name);if(!me||!me.alive)return;await submitVote(myVote||'__skip__');}
+async function submitVote(target){document.getElementById('vok').disabled=true;const room=await load();const votes=room.dayVotes||{};votes[S.name]=target;const alive=(room.players||[]).filter(p=>p.alive);await update(rRef(),{dayVotes:votes});if(alive.every(p=>votes[p.name])){stopL();stopTimer();const counts={};Object.values(votes).forEach(v=>{if(v&&v!=='__skip__')counts[v]=(counts[v]||0)+1;});processVotes(counts,alive.length);}}
+function processVotes(counts,total){stopTimer();stopL();const entries=Object.entries(counts).sort((a,b)=>b[1]-a[1]);if(!entries.length){notif('الجميع تخطى — الليل ينزل','⏭️');setTimeout(()=>nextNight(),2000);return;}const max=entries[0][1],leaders=entries.filter(e=>e[1]===max);if(leaders.length>1){notif('تعادل! لا أحد يخرج','⚖️');setTimeout(()=>nextNight(),2500);return;}S.justifyTarget=leaders[0][0];startJustify();}
+async function startJustify(){playDing();myJV=null;document.getElementById('jname').textContent=S.justifyTarget;await update(rRef(),{justifyVotes:{yes:0,no:0},justifyTarget:S.justifyTarget,justifyVoted:[]});go('pg-justify');startTimer('justify',S.settings.justifyTime,()=>processJustify());listen(r=>{const alive=(r.players||[]).filter(p=>p.alive&&p.name!==S.justifyTarget);if((r.justifyVoted||[]).length>=alive.length){stopL();stopTimer();processJustify();}});}
+async function justifyVote(yes){if(myJV!==null)return;if(S.name===S.justifyTarget)return;myJV=yes;const room=await load();const jv=room.justifyVotes||{yes:0,no:0},voted=room.justifyVoted||[];if(!voted.includes(S.name)){voted.push(S.name);if(yes)jv.yes=(jv.yes||0)+1;else jv.no=(jv.no||0)+1;}await update(rRef(),{justifyVotes:jv,justifyVoted:voted});}
+async function processJustify(){stopTimer();stopL();const room=await load();const jv=room.justifyVotes||{yes:0,no:0},players=room.players||[];if(jv.yes>jv.no){const idx=players.findIndex(p=>p.name===S.justifyTarget);if(idx>=0)players[idx].alive=false;const kicked=players[idx];const win=checkWin(players);await update(rRef(),{players,phase:win?'win':'night',round:(room.round||1)+1});S.players=players;showEvent('🚪',`${S.justifyTarget} خرج!`,`كان ${roleAr(kicked.role)}`,()=>{if(win)showWin(win,players);else nextNight();});}else{await update(rRef(),{phase:'night',round:(room.round||1)+1});notif(`${S.justifyTarget} نجا!`,'😮');setTimeout(()=>nextNight(),2000);}}
+async function nextNight(){const room=await load();S.players=room.players||[];await update(rRef(),{phase:'night-mafia',mafiaKillVote:{},dayVotes:{},justifyVotes:{yes:0,no:0},justifyVoted:[]});startNight();}
+function showSpectator(players){stopL();const ri={mafia:{e:'😈',c:'var(--red)',l:'مافيا'},doctor:{e:'🩺',c:'var(--teal)',l:'دكتور'},detective:{e:'🔍',c:'var(--gold)',l:'شايب'},citizen:{e:'👤',c:'var(--blue)',l:'مواطن'}};function render(ps){const el=document.getElementById('spec-list');el.innerHTML='';ps.forEach(p=>{const i=ri[p.role]||ri.citizen;const d=document.createElement('div');d.className='spc-row';d.style.opacity=p.alive?'1':'.45';d.innerHTML=`<div class="spc-av" style="background:${i.c}22">${i.e}</div><div style="flex:1"><div style="font-weight:700">${p.name}</div><div style="font-size:.78rem;color:${i.c};margin-top:2px">${i.l}</div></div><div style="font-size:.76rem;padding:3px 9px;border-radius:20px;background:${p.alive?'rgba(6,214,160,.15)':'rgba(230,57,70,.15)'};color:${p.alive?'var(--green)':'var(--red)'}">${p.alive?'🟢 حي':'💀 مات'}</div>`;el.appendChild(d);});}render(players);go('pg-spectator');listen(r=>{if(r.phase==='win'){stopL();showWin(checkWin(r.players),r.players);return;}render(r.players||[]);});}
+function checkWin(players){const alive=players.filter(p=>p.alive),m=alive.filter(p=>p.role==='mafia').length,c=alive.filter(p=>p.role!=='mafia').length;if(m===0)return 'citizens';if(m>=c)return 'mafia';return null;}
+function showWin(winner,players){stopTimer();stopL();const iM=winner==='mafia';document.getElementById('wic').textContent=iM?'😈':'🏆';document.getElementById('wtitle').textContent=iM?'فازت المافيا!':'فاز المواطنون!';document.getElementById('wsub').textContent=iM?'سيطرت المافيا على المدينة':'تم القضاء على كل المافيا';go('pg-win');}
+async function resetGame(){stopL();stopTimer();if(S.code)await set(rRef(),null);S={name:'',role:'',isHost:false,code:'',players:[],settings:{mafia:2,doctor:1,detective:1,mafiaTime:30,doctorTime:20,detectiveTime:20,dayTime:0,justifyTime:30},round:1,justifyTarget:null,mafiaChoice:null,doctorChoice:null,detectiveChoice:null};myVote=null;myJV=null;go('pg-home');}
+function startTimer(type,secs,onEnd){stopTimer();let rem=secs;const ne=document.getElementById('n-'+type),re=document.getElementById('t-'+type),circ=295.31;function upd(){if(ne)ne.textContent=rem;if(re)re.style.strokeDashoffset=circ*(1-rem/secs);}upd();timerInt=setInterval(()=>{rem--;upd();if(rem<=0){stopTimer();onEnd();}},1000);}
+function stopTimer(){if(timerInt){clearInterval(timerInt);timerInt=null;}}
+document.getElementById('cn').addEventListener('keydown',e=>{if(e.key==='Enter')createRoom();});
+document.getElementById('jc').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('jn').focus();});
+document.getElementById('jn').addEventListener('keydown',e=>{if(e.key==='Enter')joinRoom();});
+document.getElementById('jc').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase();});
+window.go=go;window.enableSound=enableSound;window.createRoom=createRoom;window.joinRoom=joinRoom;window.startGame=startGame;window.saveSettings=saveSettings;window.cs=cs;window.flipRole=flipRole;window.playerReady=playerReady;window.mafiaConfirm=mafiaConfirm;window.doctorConfirm=doctorConfirm;window.detectiveConfirm=detectiveConfirm;window.detectiveDone=detectiveDone;window.nightContinue=nightContinue;window.voteSkip=voteSkip;window.voteConfirm=voteConfirm;window.justifyVote=justifyVote;window.resetGame=resetGame;
+</script>
+</body>
+</html>
