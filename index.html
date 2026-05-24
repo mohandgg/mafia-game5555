@@ -281,11 +281,39 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--txt);min-
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import{getDatabase,ref,set,get,update,onValue,off}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import{getDatabase,ref,set,get,update,onValue,off,onDisconnect,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 const FC={apiKey:"AIzaSyBzI7mHc7uOtKu3EifUMvZY959UQEe1xg4",authDomain:"mafia-525.firebaseapp.com",projectId:"mafia-525",storageBucket:"mafia-525.firebasestorage.app",messagingSenderId:"1065985946565",appId:"1:1065985946565:web:a5648ac41eefdd5d79d1ac",databaseURL:"https://mafia-525-default-rtdb.firebaseio.com"};
 const app=initializeApp(FC),db=getDatabase(app);
 let S={name:'',role:'',isHost:false,code:'',players:[],settings:{mafia:2,doctor:1,detective:1,mafiaTime:30,doctorTime:20,detectiveTime:20,dayTime:0,justifyTime:30,showRole:1},round:1,justifyTarget:null,mafiaChoice:null,doctorChoice:null,detectiveChoice:null};
-let myVote=null,myJV=null,aRef=null,timerInt=null;
+let myVote=null,myJV=null,aRef=null,timerInt=null,hbInt=null;
+function setupPresence(){
+  if(hbInt)clearInterval(hbInt);
+  const presRef=ref(db,'rooms/'+S.code+'/presence/'+S.name);
+  set(presRef,Date.now()).catch(()=>{});
+  // كل 10 ثواني نحدث
+  hbInt=setInterval(()=>{if(S.code&&S.name)set(presRef,Date.now()).catch(()=>{});},10000);
+  // عند الانفصال
+  onDisconnect(presRef).remove().catch(()=>{});
+}
+async function checkDisconnected(){
+  // يتم استدعاؤها من المضيف لإزالة المنفصلين
+  if(!S.isHost||!S.code)return;
+  const snap=await get(ref(db,'rooms/'+S.code+'/presence'));
+  const pres=snap.exists()?snap.val():{};
+  const now=Date.now();
+  const players=S.players||[];
+  let changed=false;
+  players.forEach(p=>{
+    if(!p.alive)return;
+    const last=pres[p.name];
+    if(!last||(now-last>30000)){
+      p.alive=false;
+      changed=true;
+      notif(`${p.name} انقطع - خرج من اللعبة`,'📵',4000);
+    }
+  });
+  if(changed){await update(rRef(),{players});}
+}
 function rRef(c){return ref(db,'rooms/'+(c||S.code));}
 async function load(){const s=await get(rRef());return s.exists()?s.val():null;}
 function listen(cb){if(aRef)off(aRef);aRef=rRef();onValue(aRef,s=>{if(s.exists())cb(s.val());});}
@@ -306,9 +334,15 @@ function genCode(){return Math.random().toString(36).substring(2,8).toUpperCase(
 function isAlive(n){const p=S.players.find(x=>x.name===n);return p?p.alive:false;}
 function roleAr(r){return{mafia:'😈 مافيا',doctor:'🩺 دكتور',detective:'🔍 شايب',citizen:'👤 مواطن'}[r]||r;}
 function showEvent(icon,title,sub,cb){const el=document.createElement('div');el.className='eov';el.innerHTML=`<div class="eicon">${icon}</div><div class="etitle">${title}</div><div class="esub">${sub}</div><div style="margin-top:26px"><button class="btn btn-red btn-sm" onclick="this.closest('.eov').remove();if(window._evcb){window._evcb();window._evcb=null;}">حسناً</button></div>`;document.body.appendChild(el);window._evcb=cb;}
-async function createRoom(){const name=document.getElementById('cn').value.trim();if(!name){notif('اكتب اسمك أولاً','⚠️');return;}S.name=name;S.isHost=true;S.code=genCode();S.players=[{name,alive:true,role:''}];await set(rRef(S.code),{phase:'lobby',players:S.players,settings:S.settings,round:1,readyPlayers:[],mafiaKillVote:{},dayVotes:{}});document.getElementById('lcode').textContent=S.code;document.getElementById('hctrl').style.display='block';document.getElementById('gwait').style.display='none';go('pg-lobby');listenLobby();}
-async function joinRoom(){const code=document.getElementById('jc').value.trim().toUpperCase(),name=document.getElementById('jn').value.trim();if(!code||!name){notif('اكتب الكود والاسم','⚠️');return;}const snap=await get(ref(db,'rooms/'+code));if(!snap.exists()){notif('كود غلط!','❌');return;}const room=snap.val();if(room.phase!=='lobby'){notif('اللعبة بدأت','❌');return;}const players=room.players||[];if(players.some(p=>p.name.toLowerCase()===name.toLowerCase())){notif('الاسم محجوز','❌');return;}S.name=name;S.isHost=false;S.code=code;players.push({name,alive:true,role:''});await update(ref(db,'rooms/'+code),{players});document.getElementById('lcode').textContent=code;document.getElementById('hctrl').style.display='none';document.getElementById('gwait').style.display='block';go('pg-lobby');listenLobby();}
-function listenLobby(){listen(r=>{renderLobby(r);if(r.phase==='role'){stopL();syncRoom(r);startRoleReveal();}});}
+function getMafiaLeader(players){const mafias=(players||[]).filter(p=>p.role==='mafia'&&p.alive);return mafias.length?mafias[0].name:null;}
+function isMafiaLeader(){return getMafiaLeader(S.players)===S.name;}
+async function createRoom(){const name=document.getElementById('cn').value.trim();if(!name){notif('اكتب اسمك أولاً','⚠️');return;}S.name=name;S.isHost=true;S.code=genCode();S.players=[{name,alive:true,role:''}];await set(rRef(S.code),{phase:'lobby',players:S.players,settings:S.settings,round:1,readyPlayers:[],mafiaKillVote:{},dayVotes:{}});setupPresence();document.getElementById('lcode').textContent=S.code;document.getElementById('hctrl').style.display='block';document.getElementById('gwait').style.display='none';go('pg-lobby');listenLobby();}
+async function joinRoom(){const code=document.getElementById('jc').value.trim().toUpperCase(),name=document.getElementById('jn').value.trim();if(!code||!name){notif('اكتب الكود والاسم','⚠️');return;}const snap=await get(ref(db,'rooms/'+code));if(!snap.exists()){notif('كود غلط!','❌');return;}const room=snap.val();if(room.phase!=='lobby'){notif('اللعبة بدأت','❌');return;}const players=room.players||[];if(players.some(p=>p.name.toLowerCase()===name.toLowerCase())){notif('الاسم محجوز','❌');return;}S.name=name;S.isHost=false;S.code=code;players.push({name,alive:true,role:''});await update(ref(db,'rooms/'+code),{players});setupPresence();document.getElementById('lcode').textContent=code;document.getElementById('hctrl').style.display='none';document.getElementById('gwait').style.display='block';go('pg-lobby');listenLobby();}
+function listenLobby(){
+  listen(r=>{renderLobby(r);if(r.phase==='role'){stopL();syncRoom(r);startRoleReveal();}});
+  // المضيف يفحص المنفصلين كل 15 ثانية
+  if(S.isHost){if(window._hostCheck)clearInterval(window._hostCheck);window._hostCheck=setInterval(()=>checkDisconnected(),15000);}
+}
 function renderLobby(room){const players=room.players||[];document.getElementById('lcnt').textContent=players.length;const el=document.getElementById('lplayers');el.innerHTML='';players.forEach((p,i)=>{const d=document.createElement('div');d.className='prow';d.innerHTML=`<div class="pav">${p.name[0]}</div><div class="pname">${p.name}</div>${i===0?'<span class="bhost">مضيف</span>':''}`;el.appendChild(d);});if(S.isHost){document.getElementById('sbtn').disabled=players.length<4;document.getElementById('shint').textContent=players.length<4?`يحتاج ${4-players.length} أكثر`:`${players.length} جاهزون ✓`;}}
 function syncRoom(r){const me=(r.players||[]).find(p=>p.name===S.name);if(me)S.role=me.role;S.players=r.players||[];S.settings=r.settings||S.settings;S.round=r.round||1;}
 function cs(k,d){const mn={mafia:1,doctor:0,detective:0,mafiaTime:10,doctorTime:10,detectiveTime:10,dayTime:0,justifyTime:10},mx={mafia:6,doctor:3,detective:2,mafiaTime:120,doctorTime:60,detectiveTime:60,dayTime:300,justifyTime:120};S.settings[k]=Math.max(mn[k],Math.min(mx[k],S.settings[k]+d));document.getElementById('s-'+k).textContent=S.settings[k];}
@@ -317,23 +351,150 @@ async function startGame(){const room=await load();if(!room)return;const players
 function startRoleReveal(){stopL();const inf={mafia:{e:'😈',t:'مافيا',d:'تقتل لاعباً كل ليلة مع فريقك',c:'mafia'},doctor:{e:'🩺',t:'دكتور',d:'تحمي لاعباً واحداً كل ليلة',c:'doctor'},detective:{e:'🔍',t:'شايب',d:'تكشف هوية لاعب كل ليلة',c:'detective'},citizen:{e:'👤',t:'مواطن',d:'ساعد باكتشاف المافيا بالتصويت',c:'citizen'}};const r=inf[S.role]||inf.citizen;document.getElementById('remi').textContent=r.e;document.getElementById('rtitle').textContent=r.t;document.getElementById('rdesc').textContent=r.d;document.getElementById('rback').className='rback '+r.c;document.getElementById('rfl').classList.remove('flipped');document.getElementById('rbtn').textContent='✅ جاهز';document.getElementById('rbtn').disabled=false;go('pg-role');}
 function flipRole(){document.getElementById('rfl').classList.add('flipped');}
 async function playerReady(){document.getElementById('rbtn').textContent='⏳ بانتظار الجميع...';document.getElementById('rbtn').disabled=true;const room=await load();const ready=room.readyPlayers||[];if(!ready.includes(S.name))ready.push(S.name);await update(rRef(),{readyPlayers:ready});listen(r=>{if((r.readyPlayers||[]).length>=(r.players||[]).length){stopL();startNight();}});}
-async function startNight(){playDing();flash();const room=await load();S.players=room.players||[];S.settings=room.settings||S.settings;go('pg-sleep');setTimeout(()=>{if(S.role==='mafia')startMafia();else waitPhase('night-doctor',r=>{if(S.role==='doctor'&&isAlive(S.name))startDoctor();else waitPhase('night-detective',r2=>{if(S.role==='detective'&&isAlive(S.name))startDetective();else waitPhase('night-results',r3=>startNightResults(r3));});});},2500);}
+async function startNight(){
+  playDing();flash();
+  const room=await load();
+  S.players=room.players||[];
+  S.settings=room.settings||S.settings;
+  go('pg-sleep');
+  // المضيف يقود تقدم الفيز - يتخطى الأدوار للأموات
+  if(S.isHost)setTimeout(()=>hostAdvancePhases(),1500);
+  setTimeout(()=>{
+    if(S.role==='mafia'&&isAlive(S.name))startMafia();
+    else waitPhase('night-doctor',r=>{
+      if(S.role==='doctor'&&isAlive(S.name))startDoctor();
+      else waitPhase('night-detective',r2=>{
+        if(S.role==='detective'&&isAlive(S.name))startDetective();
+        else waitPhase('night-results',r3=>startNightResults(r3));
+      });
+    });
+  },2500);
+}
+async function hostAdvancePhases(){
+  // المضيف يراقب الفيز ويتخطى الأدوار الفارغة
+  // مع timeout fallback إذا تأخرت أي مرحلة
+  if(window._phaseWatcher)clearInterval(window._phaseWatcher);
+  let lastPhase=null,lastPhaseTime=Date.now();
+  window._phaseWatcher=setInterval(async()=>{
+    const room=await load();
+    if(!room)return;
+    if(room.phase!==lastPhase){lastPhase=room.phase;lastPhaseTime=Date.now();}
+    const elapsed=Date.now()-lastPhaseTime;
+    const players=room.players||[];
+    const aliveMafia=players.filter(p=>p.alive&&p.role==='mafia').length;
+    const aliveDoctor=players.filter(p=>p.alive&&p.role==='doctor').length;
+    const aliveDetective=players.filter(p=>p.alive&&p.role==='detective').length;
+    // إذا في فيز ليلية ومافي لاعبين فيها، نتخطى
+    if(room.phase==='night-mafia'&&aliveMafia===0){await update(rRef(),{phase:'night-doctor'});}
+    else if(room.phase==='night-doctor'&&aliveDoctor===0){await update(rRef(),{phase:'night-detective'});}
+    else if(room.phase==='night-detective'&&aliveDetective===0){await update(rRef(),{phase:'night-results'});}
+    // فحص timeout - إذا الفيز ما تغيرت لأكثر من (الوقت المحدد + 15 ثانية) نتقدم
+    const limits={'night-mafia':(room.settings?.mafiaTime||30)+15,'night-doctor':(room.settings?.doctorTime||20)+15,'night-detective':(room.settings?.detectiveTime||20)+15};
+    if(limits[room.phase]&&elapsed>limits[room.phase]*1000){
+      const next={'night-mafia':'night-doctor','night-doctor':'night-detective','night-detective':'night-results'};
+      if(next[room.phase]){await update(rRef(),{phase:next[room.phase]});notif(`تخطي مرحلة - لا يوجد لاعب جاهز`,'⏭️');}
+    }
+  },3000);
+}
 function waitPhase(phase,cb){listen(r=>{if(r.phase===phase||r.phase==='night-results'){stopL();S.players=r.players||S.players;if(r.phase===phase)cb(r);else if(phase!=='night-results')startNightResults(r);}});}
-function startMafia(){playDing();setTimeout(()=>playGun(),500);speak('mafia-open',900);S.mafiaChoice=null;const tgts=S.players.filter(p=>p.alive&&p.role!=='mafia');const el=document.getElementById('mafia-tgts');el.innerHTML='';tgts.forEach(p=>{const b=document.createElement('button');b.className='tgt';b.textContent=p.name;b.onclick=()=>{document.querySelectorAll('#mafia-tgts .tgt').forEach(x=>x.classList.remove('sr'));b.classList.add('sr');S.mafiaChoice=p.name;document.getElementById('mok').disabled=false;};el.appendChild(b);});document.getElementById('mok').disabled=true;go('pg-mafia');startTimer('mafia',S.settings.mafiaTime,()=>mafiaConfirm());}
-async function mafiaConfirm(){stopTimer();speak('mafia-close',0);if(!S.mafiaChoice){const t=S.players.filter(p=>p.alive&&p.role!=='mafia');if(t.length)S.mafiaChoice=t[Math.floor(Math.random()*t.length)].name;}const room=await load();const votes=room.mafiaKillVote||{};votes[S.name]=S.mafiaChoice;const mafias=(room.players||[]).filter(p=>p.role==='mafia'&&p.alive);const allVoted=mafias.every(p=>votes[p.name]);const upd={mafiaKillVote:votes};if(allVoted){const counts={};mafias.forEach(p=>{counts[votes[p.name]]=(counts[votes[p.name]]||0)+1;});upd.nightKill=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];upd.phase='night-doctor';}await update(rRef(),upd);go('pg-sleep');waitPhase('night-detective',r=>{if(S.role==='detective'&&isAlive(S.name))startDetective();else waitPhase('night-results',r2=>startNightResults(r2));});}
+function startMafia(){
+  playDing();setTimeout(()=>playGun(),500);speak('mafia-open',900);
+  S.mafiaChoice=null;
+  const leader=isMafiaLeader();
+  const el=document.getElementById('mafia-tgts');
+  const okBtn=document.getElementById('mok');
+  if(leader){
+    // أنا القائد - أختار
+    const tgts=S.players.filter(p=>p.alive&&p.role!=='mafia');
+    el.innerHTML='';
+    tgts.forEach(p=>{const b=document.createElement('button');b.className='tgt';b.textContent=p.name;b.onclick=()=>{document.querySelectorAll('#mafia-tgts .tgt').forEach(x=>x.classList.remove('sr'));b.classList.add('sr');S.mafiaChoice=p.name;okBtn.disabled=false;};el.appendChild(b);});
+    okBtn.disabled=true;
+    okBtn.style.display='flex';
+    document.querySelector('#pg-mafia .psub').textContent='أنت القائد - اختر الضحية';
+  } else {
+    // مافيا عادي - أشاهد القائد
+    el.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--mut);font-size:1rem">⏳ القائد يختار الضحية...<br><br>القائد: <span style="color:var(--red);font-weight:800">'+getMafiaLeader(S.players)+'</span></div>';
+    okBtn.style.display='none';
+  }
+  go('pg-mafia');
+  startTimer('mafia',S.settings.mafiaTime,()=>{if(leader)mafiaConfirm();else mafiaWaitDone();});
+  // كل المافيا يستمعون لقرار القائد
+  listen(r=>{
+    if(r.phase==='night-doctor'||r.phase==='night-detective'||r.phase==='night-results'||r.phase==='day'){
+      stopL();stopTimer();
+      S.players=r.players||S.players;
+      if(!leader)mafiaWaitDone(r);
+    }
+  });
+}
+function mafiaWaitDone(room){
+  stopTimer();stopL();
+  go('pg-sleep');
+  waitPhase('night-detective',r=>{if(S.role==='detective'&&isAlive(S.name))startDetective();else waitPhase('night-results',r2=>startNightResults(r2));});
+}
+async function mafiaConfirm(){
+  stopTimer();stopL();
+  if(!isMafiaLeader())return;
+  speak('mafia-close',0);
+  if(!S.mafiaChoice){const t=S.players.filter(p=>p.alive&&p.role!=='mafia');if(t.length)S.mafiaChoice=t[Math.floor(Math.random()*t.length)].name;}
+  await update(rRef(),{nightKill:S.mafiaChoice,phase:'night-doctor'});
+  go('pg-sleep');
+  waitPhase('night-detective',r=>{if(S.role==='detective'&&isAlive(S.name))startDetective();else waitPhase('night-results',r2=>startNightResults(r2));});
+}
 async function startDoctor(){playDing();setTimeout(()=>playMeds(),500);speak('doctor-open',900);const room=await load();S.doctorChoice=null;const tgts=(room.players||[]).filter(p=>p.alive);const el=document.getElementById('doctor-tgts');el.innerHTML='';tgts.forEach(p=>{const b=document.createElement('button');b.className='tgt';b.textContent=p.name;if(p.name===room.lastDoctorProtect){b.disabled=true;b.innerHTML+=`<span class="sub">محمي سابقاً</span>`;}b.onclick=()=>{document.querySelectorAll('#doctor-tgts .tgt').forEach(x=>x.classList.remove('st'));b.classList.add('st');S.doctorChoice=p.name;document.getElementById('dok').disabled=false;};el.appendChild(b);});document.getElementById('dok').disabled=true;go('pg-doctor');startTimer('doctor',S.settings.doctorTime,()=>doctorConfirm());}
 async function doctorConfirm(){stopTimer();speak('doctor-close',0);if(!S.doctorChoice){const a=S.players.filter(p=>p.alive);if(a.length)S.doctorChoice=a[Math.floor(Math.random()*a.length)].name;}await update(rRef(),{nightProtect:S.doctorChoice,lastDoctorProtect:S.doctorChoice,phase:'night-detective'});go('pg-sleep');waitPhase('night-results',r=>startNightResults(r));}
 async function startDetective(){playDing();setTimeout(()=>playPen(),500);speak('detective-open',900);const room=await load();S.detectiveChoice=null;const tgts=(room.players||[]).filter(p=>p.alive&&p.name!==S.name);const el=document.getElementById('det-tgts');el.innerHTML='';tgts.forEach(p=>{const b=document.createElement('button');b.className='tgt';b.textContent=p.name;b.onclick=()=>{document.querySelectorAll('#det-tgts .tgt').forEach(x=>x.classList.remove('sg'));b.classList.add('sg');S.detectiveChoice=p.name;document.getElementById('detok').disabled=false;};el.appendChild(b);});document.getElementById('detok').disabled=true;go('pg-detective');startTimer('detective',S.settings.detectiveTime,()=>detectiveConfirm());}
-async function detectiveConfirm(){stopTimer();speak('detective-close',0);if(!S.detectiveChoice){const t=S.players.filter(p=>p.alive&&p.name!==S.name);if(t.length)S.detectiveChoice=t[Math.floor(Math.random()*t.length)].name;}const room=await load();const target=(room.players||[]).find(p=>p.name===S.detectiveChoice);const isMafia=target&&target.role==='mafia';document.getElementById('dname').textContent=S.detectiveChoice;const v=document.getElementById('dverd');v.textContent=isMafia?'😈 هذا الشخص مافيا!':'👤 هذا الشخص مواطن';v.style.background=isMafia?'rgba(230,57,70,.2)':'rgba(72,149,239,.2)';v.style.color=isMafia?'var(--red)':'var(--blue)';await update(rRef(),{phase:'night-results'});go('pg-det-result');}
-function detectiveDone(){startNightResults(null);}
-async function startNightResults(room){if(!room)room=await load();playDing();flash();const killed=room.nightKill,protect=room.nightProtect,died=killed&&killed!==protect,players=room.players||[];if(died){const i=players.findIndex(p=>p.name===killed);if(i>=0)players[i].alive=false;}await update(rRef(),{phase:'day',players,nightKill:null,nightProtect:null,mafiaKillVote:{}});S.players=players;S.round=room.round||1;const card=document.getElementById('ncard');if(died){card.innerHTML=`<div class="rcard death"><div style="font-size:3.2rem">💀</div><div style="font-size:1.4rem;font-weight:900;margin-top:9px">${killed}</div><div style="color:var(--mut);margin-top:5px">مات هذه الليلة</div></div>`;}else if(killed&&killed===protect){card.innerHTML=`<div class="rcard saved"><div style="font-size:3.2rem">🛡️</div><div style="font-size:1.4rem;font-weight:900;margin-top:9px">${protect}</div><div style="color:var(--teal);margin-top:5px;font-weight:700">✅ تم حماية ${protect} بنجاح!</div></div>`;}else if(protect&&!killed){card.innerHTML=`<div class="rcard saved"><div style="font-size:3.2rem">🛡️</div><div style="font-size:1.4rem;font-weight:900;margin-top:9px">${protect}</div><div style="color:var(--teal);margin-top:5px;font-weight:700">✅ تم حماية ${protect} بنجاح!</div></div>`;}else{card.innerHTML=`<div class="rcard quiet"><div style="font-size:3.2rem">🌙</div><div style="font-size:1.1rem;font-weight:800;margin-top:9px">ليلة هادئة</div><div style="color:var(--mut);margin-top:5px">لم يُقتل أحد</div></div>`;}document.getElementById('nround').textContent=`الجولة ${S.round}`;const win=checkWin(players);if(win){setTimeout(()=>showWin(win,players),1500);return;}const me=players.find(p=>p.name===S.name);if(me&&!me.alive){setTimeout(()=>showSpectator(players),1800);return;}go('pg-night-results');}
+async function detectiveConfirm(){
+  stopTimer();stopL();
+  speak('detective-close',0);
+  if(!S.detectiveChoice){const t=S.players.filter(p=>p.alive&&p.name!==S.name);if(t.length)S.detectiveChoice=t[Math.floor(Math.random()*t.length)].name;}
+  const room=await load();
+  const target=(room.players||[]).find(p=>p.name===S.detectiveChoice);
+  const isMafia=target&&target.role==='mafia';
+  document.getElementById('dname').textContent=S.detectiveChoice;
+  const v=document.getElementById('dverd');
+  v.textContent=isMafia?'😈 هذا الشخص مافيا!':'👤 هذا الشخص مواطن';
+  v.style.background=isMafia?'rgba(230,57,70,.2)':'rgba(72,149,239,.2)';
+  v.style.color=isMafia?'var(--red)':'var(--blue)';
+  // لا نحدث الفيز هنا - ينتظر الشايب
+  go('pg-det-result');
+}
+async function detectiveDone(){
+  await update(rRef(),{phase:'night-results'});
+  startNightResults(null);
+}
+async function startNightResults(room){
+  if(!room)room=await load();
+  playDing();flash();
+  const killed=room.nightKill,protect=room.nightProtect,died=killed&&killed!==protect,players=room.players||[];
+  if(died){const i=players.findIndex(p=>p.name===killed);if(i>=0)players[i].alive=false;}
+  await update(rRef(),{phase:'day',players,nightKill:null,nightProtect:null,mafiaKillVote:{}});
+  S.players=players;S.round=room.round||1;
+  // عرض النتيجة كـ event overlay ثم الانتقال مباشرة للتصويت
+  let icon,title,sub;
+  if(died){icon='💀';title=`${killed} مات!`;sub='قُتل في الليل';}
+  else if(killed&&killed===protect){icon='🛡️';title=`تم حماية ${protect} بنجاح!`;sub='الدكتور أنقذه من المافيا';}
+  else if(protect&&!killed){icon='🛡️';title=`تم حماية ${protect} بنجاح!`;sub='ليلة آمنة';}
+  else{icon='🌙';title='ليلة هادئة';sub='لم يُقتل أحد';}
+  const win=checkWin(players);
+  const me=players.find(p=>p.name===S.name);
+  showEvent(icon,title,sub,()=>{
+    if(win){showWin(win,players);return;}
+    if(me&&!me.alive){showSpectator(players);return;}
+    startDay();
+  });
+}
 function nightContinue(){startDay();}
 async function startDay(){playDing();const room=await load();S.players=room.players||[];S.settings=room.settings||S.settings;myVote=null;await update(rRef(),{dayVotes:{}});const grid=document.getElementById('vgrid');grid.innerHTML='';S.players.filter(p=>p.alive&&p.name!==S.name).forEach(p=>{const b=document.createElement('div');b.className='vcard';b.id='vc-'+p.name;b.innerHTML=`<div class="vname">${p.name}</div><div class="vcnt" id="vcnt-${p.name}">0 أصوات</div><div class="vbar" id="vbar-${p.name}" style="width:0%"></div>`;b.onclick=()=>{document.querySelectorAll('.vcard').forEach(x=>x.classList.remove('voted'));b.classList.add('voted');myVote=p.name;document.getElementById('vok').disabled=false;};grid.appendChild(b);});document.getElementById('vok').disabled=true;go('pg-day');if(S.settings.dayTime>0)startTimer('day',S.settings.dayTime,()=>voteConfirm());else{document.getElementById('n-day').textContent='∞';document.getElementById('t-day').style.strokeDashoffset='0';}listen(r=>{const votes=r.dayVotes||{},alive=(r.players||[]).filter(p=>p.alive),total=alive.length,counts={};Object.values(votes).forEach(v=>{if(v&&v!=='__skip__')counts[v]=(counts[v]||0)+1;});alive.forEach(p=>{const el=document.getElementById('vcnt-'+p.name),bar=document.getElementById('vbar-'+p.name);if(el)el.textContent=(counts[p.name]||0)+' أصوات';if(bar)bar.style.width=((counts[p.name]||0)/Math.max(total,1)*100)+'%';});let skips2=0;Object.values(votes).forEach(v=>{if(v==='__skip__')skips2++;});if(Object.keys(votes).length>=total){stopL();stopTimer();processVotes(counts,total,skips2);}});}
 async function voteSkip(){
-  document.getElementById('vok').disabled=true;
+  stopTimer();
   const me=S.players.find(p=>p.name===S.name);
   if(!me||!me.alive){notif('أنت خارج اللعبة','👻');return;}
+  document.getElementById('vok').disabled=true;
+  document.querySelectorAll('.vcard').forEach(x=>x.classList.remove('voted'));
+  myVote=null;
   await submitVote('__skip__');
+  notif('تم التخطي ✓','⏭️',1500);
 }
 async function voteConfirm(){stopTimer();const me=S.players.find(p=>p.name===S.name);if(!me||!me.alive)return;await submitVote(myVote||'__skip__');}
 async function submitVote(target){document.getElementById('vok').disabled=true;const room=await load();const votes=room.dayVotes||{};votes[S.name]=target;const alive=(room.players||[]).filter(p=>p.alive);await update(rRef(),{dayVotes:votes});if(alive.every(p=>votes[p.name])){stopL();stopTimer();const counts={};let skips=0;Object.values(votes).forEach(v=>{if(v&&v!=='__skip__')counts[v]=(counts[v]||0)+1;else if(v==='__skip__')skips++;});processVotes(counts,alive.length,skips);}}
@@ -355,7 +516,12 @@ async function nextNight(){const room=await load();S.players=room.players||[];aw
 function showSpectator(players){stopL();const ri={mafia:{e:'😈',c:'var(--red)',l:'مافيا'},doctor:{e:'🩺',c:'var(--teal)',l:'دكتور'},detective:{e:'🔍',c:'var(--gold)',l:'شايب'},citizen:{e:'👤',c:'var(--blue)',l:'مواطن'}};function render(ps){const el=document.getElementById('spec-list');el.innerHTML='';ps.forEach(p=>{const i=ri[p.role]||ri.citizen;const d=document.createElement('div');d.className='spc-row';d.style.opacity=p.alive?'1':'.45';d.innerHTML=`<div class="spc-av" style="background:${i.c}22">${i.e}</div><div style="flex:1"><div style="font-weight:700">${p.name}</div><div style="font-size:.78rem;color:${i.c};margin-top:2px">${i.l}</div></div><div style="font-size:.76rem;padding:3px 9px;border-radius:20px;background:${p.alive?'rgba(6,214,160,.15)':'rgba(230,57,70,.15)'};color:${p.alive?'var(--green)':'var(--red)'}">${p.alive?'🟢 حي':'💀 مات'}</div>`;el.appendChild(d);});}render(players);go('pg-spectator');listen(r=>{if(r.phase==='win'){stopL();showWin(checkWin(r.players),r.players);return;}render(r.players||[]);});}
 function checkWin(players){const alive=players.filter(p=>p.alive),m=alive.filter(p=>p.role==='mafia').length,c=alive.filter(p=>p.role!=='mafia').length;if(m===0)return 'citizens';if(m>=c)return 'mafia';return null;}
 function showWin(winner,players){stopTimer();stopL();const iM=winner==='mafia';document.getElementById('wic').textContent=iM?'😈':'🏆';document.getElementById('wtitle').textContent=iM?'فازت المافيا!':'فاز المواطنون!';document.getElementById('wsub').textContent=iM?'سيطرت المافيا على المدينة':'تم القضاء على كل المافيا';go('pg-win');}
-async function resetGame(){stopL();stopTimer();if(S.code)await set(rRef(),null);S={name:'',role:'',isHost:false,code:'',players:[],settings:{mafia:2,doctor:1,detective:1,mafiaTime:30,doctorTime:20,detectiveTime:20,dayTime:0,justifyTime:30,showRole:1},round:1,justifyTarget:null,mafiaChoice:null,doctorChoice:null,detectiveChoice:null};myVote=null;myJV=null;go('pg-home');}
+async function resetGame(){
+  stopL();stopTimer();
+  if(window._phaseWatcher){clearInterval(window._phaseWatcher);window._phaseWatcher=null;}
+  if(window._hostCheck){clearInterval(window._hostCheck);window._hostCheck=null;}
+  if(hbInt){clearInterval(hbInt);hbInt=null;}
+  if(S.code)await set(rRef(),null);S={name:'',role:'',isHost:false,code:'',players:[],settings:{mafia:2,doctor:1,detective:1,mafiaTime:30,doctorTime:20,detectiveTime:20,dayTime:0,justifyTime:30,showRole:1},round:1,justifyTarget:null,mafiaChoice:null,doctorChoice:null,detectiveChoice:null};myVote=null;myJV=null;go('pg-home');}
 function startTimer(type,secs,onEnd){stopTimer();let rem=secs;const ne=document.getElementById('n-'+type),re=document.getElementById('t-'+type),circ=295.31;function upd(){if(ne)ne.textContent=rem;if(re)re.style.strokeDashoffset=circ*(1-rem/secs);}upd();timerInt=setInterval(()=>{rem--;upd();if(rem<=0){stopTimer();onEnd();}},1000);}
 function stopTimer(){if(timerInt){clearInterval(timerInt);timerInt=null;}}
 document.getElementById('cn').addEventListener('keydown',e=>{if(e.key==='Enter')createRoom();});
